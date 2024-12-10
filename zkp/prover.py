@@ -1,5 +1,5 @@
-from trusted_setup import TrustedSetup
-from poly import Polynomial
+from zkp.trusted_setup import TrustedSetup
+from zkp.poly import Polynomial
 
 class Prover:
     def __init__(self, setup: TrustedSetup, password: int):

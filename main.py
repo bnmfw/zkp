@@ -1,6 +1,6 @@
-from prover import Prover
-from verifier import Verifier
-from trusted_setup import setup
+from zkp.prover import Prover
+from zkp.verifier import Verifier
+from zkp.trusted_setup import setup
 import hashlib
 
 stored_provers = {}

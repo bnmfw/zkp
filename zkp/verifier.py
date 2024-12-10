@@ -1,4 +1,4 @@
-from trusted_setup import TrustedSetup
+from zkp.trusted_setup import TrustedSetup
 from bib.pairing import tate_pairing
 from bib.bls12381 import MINUS1
 from random import randint
