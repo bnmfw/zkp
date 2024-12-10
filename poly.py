@@ -57,3 +57,6 @@ class Polynomial:
         wx = Polynomial(None)
         wx.setPoly(wcoef)
         return wx
+
+    def get_coefficients(self):
+        return self.__coeficients

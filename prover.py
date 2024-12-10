@@ -15,3 +15,6 @@ class Prover:
     def WS(self, a):
         wx: Polynomial = self.__poly.divide(a)
         return wx.apply(self.__setup.getSBS())
+
+    def get_polynomial(self):
+        return self.__poly.get_coefficients()
