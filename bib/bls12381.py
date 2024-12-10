@@ -1,3 +1,7 @@
+"""
+Este modulo contem parte o arcabouco necessario para aritimetica com Curvas Elipticas
+"""
+
 # flake8: noqa
 from .fields import Fq, Fq2
 

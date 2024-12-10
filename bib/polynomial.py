@@ -1,4 +1,9 @@
+"""
+Este modulo contem o arcabouco necessario para operacoes aritimeticas com polinomios
+"""
+
 from bib.bls12381 import n, MINUS1
+
 
 def lagrange_polynomial(points, prime=n):
     return __interpolate_polynomial(
@@ -46,16 +51,18 @@ def __determinant(m):
         prev = M[i][i]
     return sign * M[-1][-1]
 
+
 # modular math
 def __mod_inv(x, p):
-	assert __gcd(x, p) == 1, "Divisor %d not coprime to modulus %d" % (x, p)
-	z, a = (x % p), 1
-	while z != 1:
-		q = - (p // z)
-		z, a = (p + q * z), (q * a) % p
-	return a
+    assert __gcd(x, p) == 1, "Divisor %d not coprime to modulus %d" % (x, p)
+    z, a = (x % p), 1
+    while z != 1:
+        q = -(p // z)
+        z, a = (p + q * z), (q * a) % p
+    return a
+
 
 def __gcd(a, b):
-	while b:
-		a, b = b, a % b
-	return a
+    while b:
+        a, b = b, a % b
+    return a

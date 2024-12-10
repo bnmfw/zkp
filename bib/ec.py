@@ -1,17 +1,19 @@
+"""
+Este modulo contem parte o arcabouco necessario para aritimetica com Curvas Elipticas
+"""
+
 from __future__ import annotations
 
 from collections import namedtuple
 from copy import deepcopy
-from typing import List, Optional
 
 import bib.bls12381 as bls12381
-from bib.fields import FieldExtBase, Fq, Fq2, Fq6, Fq12
+from bib.fields import FieldExtBase, Fq, Fq6, Fq12
 
 # Struct for elliptic curve parameters
 EC = namedtuple("EC", "q a b gx gy g2x g2y n h x k sqrt_n3 sqrt_n3m1o2")
 
 default_ec = EC(*bls12381.parameters())
-default_ec_twist = EC(*bls12381.parameters_twist())
 
 
 class AffinePoint:
@@ -151,13 +153,12 @@ class JacobianPoint:
             return AffinePoint(
                 Fq.zero(self.ec.q), Fq.zero(self.ec.q), self.infinity, self.ec
             )
-        new_x = self.x / (self.z ** 2)
-        new_y = self.y / (self.z ** 3)
+        new_x = self.x / (self.z**2)
+        new_y = self.y / (self.z**3)
         return AffinePoint(new_x, new_y, self.infinity, self.ec)
 
     def check_valid(self) -> None:
         assert self.is_on_curve()
-        assert self * self.ec.n == G2Infinity()
 
     def __add__(self, other: JacobianPoint) -> JacobianPoint:
         if other == 0:
@@ -205,9 +206,6 @@ class JacobianPoint:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def __bytes__(self) -> bytes:
-        return point_to_bytes(self, self.ec, self.FE)
-
     def __deepcopy__(self, memo) -> JacobianPoint:
         return JacobianPoint(
             deepcopy(self.x, memo),
@@ -219,21 +217,6 @@ class JacobianPoint:
 
     def __hash__(self) -> int:
         return int.from_bytes(bytes(self), "big")
-
-
-def y_for_x(x, ec=default_ec, FE=Fq):
-    """
-    Solves y = sqrt(x^3 + ax + b) for both valid ys.
-    """
-    if not isinstance(x, FE):
-        x = FE(ec.q, x)
-
-    u = x * x * x + ec.a * x + ec.b
-
-    y = u.modsqrt()
-    if y == 0 or not AffinePoint(x, y, False, ec).is_on_curve():
-        raise ValueError("No y for point x")
-    return y
 
 
 def double_point(p1: AffinePoint, ec=default_ec, FE=Fq) -> AffinePoint:
@@ -314,13 +297,13 @@ def add_points_jacobian(
     if p2.infinity:
         return p1
     # U1 = X1*Z2^2
-    U1 = p1.x * (p2.z ** 2)
+    U1 = p1.x * (p2.z**2)
     # U2 = X2*Z1^2
-    U2 = p2.x * (p1.z ** 2)
+    U2 = p2.x * (p1.z**2)
     # S1 = Y1*Z2^3
-    S1 = p1.y * (p2.z ** 3)
+    S1 = p1.y * (p2.z**3)
     # S2 = Y2*Z1^3
-    S2 = p2.y * (p1.z ** 3)
+    S2 = p2.y * (p1.z**3)
     if U1 == U2:
         if S1 != S2:
             return JacobianPoint(FE.one(ec.q), FE.one(ec.q), FE.zero(ec.q), True, ec)
@@ -383,30 +366,6 @@ def scalar_mult_jacobian(c, p1: JacobianPoint, ec=default_ec, FE=Fq) -> Jacobian
     return result
 
 
-def G1Generator(ec=default_ec) -> JacobianPoint:
-    return AffinePoint(ec.gx, ec.gy, False, ec).to_jacobian()
-
-
-def G2Generator(ec=default_ec_twist) -> JacobianPoint:
-    return AffinePoint(ec.g2x, ec.g2y, False, ec).to_jacobian()
-
-
-def G1Infinity(ec=default_ec, FE=Fq) -> JacobianPoint:
-    return JacobianPoint(FE.one(ec.q), FE.one(ec.q), FE.zero(ec.q), True, ec)
-
-
-def G2Infinity(ec=default_ec_twist, FE=Fq2) -> JacobianPoint:
-    return JacobianPoint(FE.one(ec.q), FE.one(ec.q), FE.zero(ec.q), True, ec)
-
-
-def G1FromBytes(buffer: bytes, ec=default_ec, FE=Fq) -> JacobianPoint:
-    return bytes_to_point(buffer, ec, FE)
-
-
-def G2FromBytes(buffer: bytes, ec=default_ec_twist, FE=Fq2):
-    return bytes_to_point(buffer, ec, FE)
-
-
 def untwist(point: AffinePoint, ec=default_ec) -> AffinePoint:
     """
     Given a point on G2 on the twisted curve, this converts its
@@ -417,71 +376,6 @@ def untwist(point: AffinePoint, ec=default_ec) -> AffinePoint:
     wsq = Fq12(ec.q, f.root, Fq6.zero(ec.q))
     wcu = Fq12(ec.q, Fq6.zero(ec.q), f.root)
     return AffinePoint(point.x / wsq, point.y / wcu, False, ec)
-
-
-def twist(point: AffinePoint, ec=default_ec_twist) -> AffinePoint:
-    """
-    Given an untwisted point, this converts it's
-    coordinates to a point on the twisted curve. See Craig Costello
-    book, look up twists.
-    """
-    f = Fq12.one(ec.q)
-    wsq = Fq12(ec.q, f.root, Fq6.zero(ec.q))
-    wcu = Fq12(ec.q, Fq6.zero(ec.q), f.root)
-    new_x = point.x * wsq
-    new_y = point.y * wcu
-    return AffinePoint(new_x, new_y, False, ec)
-
-
-# Isogeny map evaluation specified by map_coeffs
-#
-# map_coeffs should be specified as (xnum, xden, ynum, yden)
-#
-# This function evaluates the isogeny over Jacobian projective coordinates.
-# For details, see Section 4.3 of
-#    Wahby and Boneh, "Fast and simple constant-time hashing to the BLS12-381 elliptic curve."
-#    ePrint # 2019/403, https://ia.cr/2019/403.
-def eval_iso(P: JacobianPoint, map_coeffs, ec) -> JacobianPoint:
-    (x, y, z) = (P.x, P.y, P.z)
-    mapvals: List[Optional[Fq2]] = [None] * 4
-
-    # Precompute the required powers of Z^2
-    maxord = max(len(coeffs) for coeffs in map_coeffs)
-    zpows: List[Optional[Fq2]] = [None] * maxord
-    zpows[0] = z ** 0  # type: ignore
-    zpows[1] = z ** 2  # type: ignore
-    for idx in range(2, len(zpows)):
-        assert zpows[idx - 1] is not None
-        assert zpows[1] is not None
-        zpows[idx] = zpows[idx - 1] * zpows[1]
-
-    # Compute the numerator and denominator of the X and Y maps via Horner's rule
-    for (idx, coeffs) in enumerate(map_coeffs):
-        coeffs_z = [
-            zpow * c for (zpow, c) in zip(reversed(coeffs), zpows[: len(coeffs)])
-        ]
-        tmp = coeffs_z[0]
-        for coeff in coeffs_z[1:]:
-            tmp *= x
-            tmp += coeff
-        mapvals[idx] = tmp
-
-    # xden is of order 1 less than xnum, so one needs to multiply it by an extra factor of Z^2
-    assert len(map_coeffs[1]) + 1 == len(map_coeffs[0])
-    assert zpows[1] is not None
-    assert mapvals[1] is not None
-    mapvals[1] *= zpows[1]
-
-    # Multiply the result of Y map by the y-coordinate y / z^3
-    assert mapvals[2] is not None
-    assert mapvals[3] is not None
-    mapvals[2] *= y
-    mapvals[3] *= z ** 3
-
-    Z = mapvals[1] * mapvals[3]
-    X = mapvals[0] * mapvals[3] * Z
-    Y = mapvals[2] * mapvals[1] * Z * Z
-    return JacobianPoint(X, Y, Z, P.infinity, ec)
 
 
 """

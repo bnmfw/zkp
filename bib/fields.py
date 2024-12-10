@@ -1,3 +1,7 @@
+"""
+Este modulo contem parte o arcabouco necessario para aritimetica com Curvas Elipticas
+"""
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -497,9 +501,9 @@ class Fq12(FieldExtBase):
 
 # Because fields aren't done with metaclasses, and we need to
 # avoid circular imports, we put a hack here for bls12381 for now.
-bls12381_q = (
-    q
-) = 0x1A0111EA397FE69A4B1BA7B6434BACD764774B84F38512BF6730D2A0F6B0F6241EABFFFEB153FFFFB9FEFFFFFFFFAAAB
+bls12381_q = q = (
+    0x1A0111EA397FE69A4B1BA7B6434BACD764774B84F38512BF6730D2A0F6B0F6241EABFFFEB153FFFFB9FEFFFFFFFFAAAB
+)
 
 # roots of unity, used for computing square roots in Fq2
 rv1 = 0x6AF0E0437FF400B6831E36D6BD17FFE48395DABC2D3435E77F76E17009241C5EE67992F72EC05F4C81084FBEDE3CC09
