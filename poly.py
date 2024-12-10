@@ -1,5 +1,5 @@
 from kzg import format_data, lagrange_polynomial, hexlify
-from bls12381 import n
+from bls12381 import n, MINUS1
 from polynomial import polynomial_division
 
 
@@ -43,7 +43,7 @@ class Polynomial:
     def divide(self, a):
         b = self.apply(a)
         poly = self.__coeficients.copy()
-        poly[0] += b * (n - 1)
+        poly[0] += b * MINUS1
         poly[0] %= n
-        qx, _ = polynomial_division(poly, (n - 1) * a)
+        qx, _ = polynomial_division(poly, MINUS1 * a)
         return qx

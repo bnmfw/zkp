@@ -42,6 +42,7 @@ g2y = Fq2(
 # actually has more valid points than this. This is relevant when hashing onto the
 # curve, where we use a point that is not in g2, and map it into g2.
 n = 0x73EDA753299D7D483339D80809A1D80553BDA402FFFE5BFEFFFFFFFF00000001
+MINUS1 = n - 1
 
 # Cofactor used to generate r torsion points
 h = 0x396C8C005555E1568C00AAAB0000AAAB
@@ -57,6 +58,7 @@ sqrt_n3 = 1586958781458431025242759403266842894121773480562120986020912974854563
 
 # (sqrt(-3) - 1) / 2 mod q
 sqrt_n3m1o2 = 793479390729215512621379701633421447060886740281060493010456487427281649075476305620758731620350
+
 
 # This is the normal elliptic curve. G1 points are on here.
 def parameters():

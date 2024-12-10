@@ -1,6 +1,6 @@
 from trusted_setup import TrustedSetup
 from pairing import tate_pairing
-from bls12381 import n
+from bls12381 import n, MINUS1
 from random import randint
 
 
@@ -18,8 +18,9 @@ class Verifier:
     def setCommitment(self, commit):
         self.__commit = commit
 
-    def verify(self, proof):
-        s_minus_x = (n - self.__a) * self.__setup.getG2() + self.__setup.getSG2()
-        result = tate_pairing(proof, s_minus_x)
-        c_minus_y = (n - self.__b) * self.__setup.getG1() + self.__commit
-        return result == tate_pairing(c_minus_y, self.__setup.getG2())
+    def verify(self, ws):
+        s_minus_a = self.__setup.getSG2() + MINUS1 * self.__a * self.__setup.getG2()
+        fs_minus_b = self.__commit + MINUS1 * self.__b * self.__setup.getG1()
+        return tate_pairing(ws, s_minus_a) == tate_pairing(
+            fs_minus_b, self.__setup.getG2()
+        )
