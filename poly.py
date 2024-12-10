@@ -47,3 +47,6 @@ class Polynomial:
         poly[0] %= n
         qx, _ = polynomial_division(poly, MINUS1 * a)
         return qx
+
+    def get_coefficients(self):
+        return self.__coeficients
