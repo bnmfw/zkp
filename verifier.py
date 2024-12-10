@@ -1,6 +1,6 @@
 from trusted_setup import TrustedSetup
-from pairing import tate_pairing
-from bls12381 import n, MINUS1
+from bib.pairing import tate_pairing
+from bib.bls12381 import MINUS1
 from random import randint
 
 

@@ -1,22 +1,4 @@
-from bls12381 import n, MINUS1
-from util import mod_inv
-
-# consider using galois package and replacing `lagrange_polynomial`
-# with commented alternate implementation below for faster polynomial interpolation
-# but much longer wait on startup to load GF(n) and all lookup tables
-
-# from galois import GF, lagrange_poly
-
-# print("...please wait a minute to compute lookup tables for GF(n)...")
-# default_f=GF(n,1,verify=False)
-
-# # returns polynomial encoded as an array of coefficients in ascending order
-# def lagrange_polynomial(points, f=default_f):
-# 	p = lagrange_poly(f([point[0] for point in points]),f([point[1] for point in points]))
-# 	coeffs = [int(i) for i in p.coefficients(len(points))]
-# 	coeffs.reverse()
-# 	return coeffs
-
+from bib.bls12381 import n, MINUS1
 
 def lagrange_polynomial(points, prime=n):
     return __interpolate_polynomial(
@@ -35,7 +17,7 @@ def polynomial_division(polynomial, divisor):
         if i < len(polynomial) - 2:
             remainder = polynomial[i + 2]
     final_polynomial.reverse()
-    return final_polynomial, remainder
+    return final_polynomial
 
 
 # low-level lagrange interpolation reduced mod prime
@@ -43,7 +25,7 @@ def __interpolate_polynomial(x, y, prime):
     M = [[_x**i * (-1) ** (i * len(x)) for _x in x] for i in range(len(x))]
     N = [(M + [y] + M)[d : d + len(x)] for d in range(len(x) + 1)]
     C = [__determinant(k) for k in N]
-    fac = mod_inv(C[0] * (-1) ** (len(x) + 1), prime)
+    fac = __mod_inv(C[0] * (-1) ** (len(x) + 1), prime)
     C = [i * fac % prime for i in C]
     return C[1:]
 
@@ -63,3 +45,17 @@ def __determinant(m):
                 M[j][k] = (M[j][k] * M[i][i] - M[j][i] * M[i][k]) // prev
         prev = M[i][i]
     return sign * M[-1][-1]
+
+# modular math
+def __mod_inv(x, p):
+	assert __gcd(x, p) == 1, "Divisor %d not coprime to modulus %d" % (x, p)
+	z, a = (x % p), 1
+	while z != 1:
+		q = - (p // z)
+		z, a = (p + q * z), (q * a) % p
+	return a
+
+def __gcd(a, b):
+	while b:
+		a, b = b, a % b
+	return a

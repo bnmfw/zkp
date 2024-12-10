@@ -1,7 +1,15 @@
-from kzg import format_data, lagrange_polynomial, hexlify
-from bls12381 import n, MINUS1
-from polynomial import polynomial_division
+from binascii import hexlify
+from bib.bls12381 import n, MINUS1
+from bib.polynomial import polynomial_division, lagrange_polynomial
 
+def format_data(data, data_len):
+    if type(data) != bytes:
+        data = data.encode("utf-8")
+    assert len(data) <= data_len, "data too large"
+    if len(data) < data_len:
+        padding = b"\x00" * (data_len - len(data))
+        data = data + padding
+    return data
 
 class Polynomial:
     def __init__(self, password):
@@ -45,5 +53,7 @@ class Polynomial:
         poly = self.__coeficients.copy()
         poly[0] += b * MINUS1
         poly[0] %= n
-        qx, _ = polynomial_division(poly, MINUS1 * a)
-        return qx
+        wcoef = polynomial_division(poly, MINUS1 * a)
+        wx = Polynomial(None)
+        wx.setPoly(wcoef)
+        return wx

@@ -4,8 +4,8 @@ from collections import namedtuple
 from copy import deepcopy
 from typing import List, Optional
 
-import bls12381
-from fields import FieldExtBase, Fq, Fq2, Fq6, Fq12
+import bib.bls12381 as bls12381
+from bib.fields import FieldExtBase, Fq, Fq2, Fq6, Fq12
 
 # Struct for elliptic curve parameters
 EC = namedtuple("EC", "q a b gx gy g2x g2y n h x k sqrt_n3 sqrt_n3m1o2")

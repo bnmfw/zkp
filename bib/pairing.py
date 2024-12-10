@@ -1,9 +1,9 @@
 from collections import namedtuple
 from typing import List
 
-import bls12381
-from ec import AffinePoint, JacobianPoint, untwist
-from fields import Fq, Fq12
+import bib.bls12381 as bls12381
+from bib.ec import AffinePoint, JacobianPoint, untwist
+from bib.fields import Fq, Fq12
 
 # Struct for elliptic curve parameters
 EC = namedtuple("EC", "q a b gx gy g2x g2y n h x k sqrt_n3 sqrt_n3m1o2")

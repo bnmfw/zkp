@@ -1,5 +1,5 @@
 import kzg
-from polynomial import evaluate_polynomial
+from bib.polynomial import evaluate_polynomial
 import hashlib
 
 stored_polynomial = None

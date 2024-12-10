@@ -1,5 +1,12 @@
-from ec import JacobianPoint, AffinePoint, EC
-import bls12381
+from bib.ec import JacobianPoint, AffinePoint, EC
+import bib.bls12381 as bls12381
+from secrets import randbelow
+
+def rand_int(prime):
+	return __randrange(1, prime-1)
+
+def __randrange(lower, upper):
+	return randbelow(upper-lower)+lower
 
 class TrustedSetup:
     def __init__(self, s: int, power: int = 16):
@@ -17,5 +24,10 @@ class TrustedSetup:
     def getSBS(self): return self.__encripted_s
 
     def getSG2(self): return self.__s_G2
+	
+def rand_int(prime):
+	return __randrange(1, prime-1)
 
-setup = TrustedSetup(4407697174071727152978788492618288547108724430693899596767139174863299291018)
+def __randrange(lower, upper):
+	return randbelow(upper-lower)+lower
+setup = TrustedSetup(rand_int(bls12381.n))
